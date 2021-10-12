@@ -10,7 +10,7 @@ Nmap (“Network Mapper”) is an open source tool for network exploration and s
     -  what operating systems (and OS versions) they are running
 
 
-## What is NmapDeciver?
+## Why you need NmapDeciver?
 
 ### First step in the cyber kill chain
 Network reconnaissance is the first step of the cyber kill chain from the adversaies' perspective, in this phase, adversaries may try to research, distinguish and choose the target by using a reconnaissance tool (ex:Nmap) to obtain information about this target environment.
