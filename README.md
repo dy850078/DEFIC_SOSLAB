@@ -3,7 +3,7 @@
 ## What is Nmap?
 Nmap (“Network Mapper”) is an open source tool for network exploration and security auditing. 
 
-Although it has a lot of useful features, there have 3 features which is well known:    
+Although it has a lot of useful features, there have 3 well-known features:    
  - **Host Discovery**
     -  determine what hosts are available on the network 
  - **Port Scanning**
@@ -12,15 +12,15 @@ Although it has a lot of useful features, there have 3 features which is well kn
     -  what operating systems (and OS versions) they are running
 
 
-## Why you need NmapDeciver?
+## Why do you need NmapDeciver?
 
 ### First step in the cyber kill chain
-Network reconnaissance is the first step of the cyber kill chain from the adversaries' perspective, in this phase, adversaries may try to research, distinguish and choose the target by using reconnaissance tools (ex: Nmap) to obtain information related to this target environment.
+Network reconnaissance is the first step of the cyber kill chain from the adversaries' perspective, in this phase, adversaries may try to research, distinguish and choose the target by using reconnaissance tools (ex: Nmap, etc) to obtain information related to the target environment
 
 ### Why did we create NmapDeceiver?
 Our Objection is to deceive the adversaries when s/he take the first step of network attack - Network reconnaissance 
 
-We place NmapDeceiver in the router, so whenever we receive Nmap scanning packet from the adversaries, we can send the corresponding packets back to pretend the fake status of our environment according to Nmap scanning rules
+We place NmapDeceiver in the router, so whenever we receive Nmap scanning packet from the adversaries, we can send the corresponding packets back to pretend the actual status of our environment according to Nmap scanning rules
 
 
 ## Running NmapDeceiver
