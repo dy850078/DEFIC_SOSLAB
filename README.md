@@ -13,11 +13,12 @@ Nmap (“Network Mapper”) is an open source tool for network exploration and s
 ## What is NmapDeciver?
 
 ### First step in the cyber kill chain
-Network reconnaissance is the first step of the cyber kill chain from the attacker's perspective, in this phase, adversaries may try to research, distinguish and choose the target by using a reconnaissance tool (ex:Nmap) to obtain information about this target environment.
+Network reconnaissance is the first step of the cyber kill chain from the adversaies' perspective, in this phase, adversaries may try to research, distinguish and choose the target by using a reconnaissance tool (ex:Nmap) to obtain information about this target environment.
 
 ### Why did we create NmapDeceiver?
 Our Objection is to deceive the adversaries when s/he take the first step of network attack - Network reconnaissance 
-We place NmapDeceiver in the router, so whenever we receive Nmap scanning packet from the adversaries, we can send the corresponding packets back to pretend the actual status of our environment back according to Nmap scanning rules
+
+We place NmapDeceiver in the router, so whenever we receive Nmap scanning packet from the adversaries, we can send the corresponding packets back to pretend the actual status of our environment according to Nmap scanning rules
 
 
 ## Running NmapDeceiver
