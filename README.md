@@ -31,3 +31,12 @@ You can clone the NmapDeceiver repository for the most recent changes:
 The following parameters you can use after installing NmapDeceiver
 
 ```python3 main.py [--host] [--port] [--nic] [--sT] [--hs] [--open] [--close]```
+
+## Reference
+
+Nmap doc. 
+https://nmap.org/docs.html
+
+EVE-NG CookBook
+https://www.eve-ng.net/index.php/documentation/community-cookbook/
+
