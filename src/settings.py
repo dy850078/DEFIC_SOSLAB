@@ -1,4 +1,3 @@
-
 # NOTE: Global Constants
 ETH_HEADER_LEN = 14
 IP_HEADER_LEN = 20
