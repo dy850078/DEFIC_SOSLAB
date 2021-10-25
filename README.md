@@ -31,7 +31,19 @@ You can clone the NmapDeceiver repository for the most recent changes:
 
 The following parameters you can use after installing NmapDeceiver
 
-```python3 main.py [--host] [--port] [--nic] [--sT] [--hs] [--open] [--close]```
+```python3 main.py [--host] [--nic] [--scan] [--status]```
+
+```--host``` will allow you to specify your host that you want to protect
+
+```--nic```  will cause NmapDeciver to send & monitor packet on this nic 
+
+```--scan``` use 's' or 'hs' to test different nmap scanning function
+
+```--status``` determine the status of these ports (```open``` or ```close```) you want to deceive
+
+Eg: ```python3 main.py --host 192.168.1.2 --nic eth0 --scan hs --status open``` or  
+
+```python3 main.py --host 192.168.1.2 --scan s --status close```
 
 ## Reference
 
