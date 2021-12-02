@@ -1,7 +1,6 @@
 import logging
 import socket
 import struct
-
 import src.settings as settings
 from src.tcp import TcpConnect, getIPChecksum, getTCPChecksum
 
@@ -9,6 +8,7 @@ from src.tcp import TcpConnect, getIPChecksum, getTCPChecksum
 class PortDeceiver:
 
     def __init__(self, host):
+        self.host = host
         self.conn = TcpConnect(host)
 
     def send_packet(self, recv_flags, reply_flags):
@@ -101,9 +101,9 @@ class PortDeceiver:
             port_flag = 20
             print('deceive close')
         # count = 0
+
         while True:
             packet, _ = self.conn.sock.recvfrom(65565)
-
             eth_header = packet[: settings.ETH_HEADER_LEN]
             eth = struct.unpack('!6s6sH', eth_header)
             eth_protocol = socket.ntohs(eth[2])
@@ -119,12 +119,13 @@ class PortDeceiver:
             reply_eth_header = struct.pack('!6s6sH', reply_eth_dMAC, reply_eth_sMAC, eth[2])
 
             ip_header = packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN]
-            IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID, FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, check_sum_of_hdr, src_IP, dest_IP = struct.unpack(
-                '!BBHHHBBH4s4s', ip_header)
+            IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID, FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, check_sum_of_hdr, \
+                src_IP, dest_IP = struct.unpack('!BBHHHBBH4s4s', ip_header)
             '''
             if dest_IP != socket.inet_aton(self.sip) or src_IP != socket.inet_aton(self.dip):
                 continue
             '''
+
             if dest_IP != socket.inet_aton(self.conn.dip):
                 continue
 
@@ -145,6 +146,10 @@ class PortDeceiver:
 
             # tcp=0x06
             if PROTOCOL == 6:
+                if port_status == 'record':
+                    f = open('pkt_record.txt', 'a')
+                    f.write(str(packet) + '\n')
+                    continue
                 tcp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
                                     settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN]
                 src_port, dest_port, seq, ack_num, offset, flags, window, checksum, urgent_ptr = struct.unpack(
@@ -161,7 +166,7 @@ class PortDeceiver:
                     reply_tcp_header = self.conn.build_tcp_header_from_reply(5, reply_seq, reply_ack_vum,
                                                                              reply_src_port, reply_dest_port,
                                                                              reply_src_IP, reply_dest_IP, port_flag)
-                    # receive ack receive
+                # receive ack receive
                 elif flags == 16:
                     # reply rst
                     print('receive ack')
@@ -181,6 +186,8 @@ class PortDeceiver:
 
             # icmp=0x01
             elif PROTOCOL == 1:
+                if port_status == 'record':
+                    continue
                 icmp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.ICMP_HEADER_LEN]
                 data = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.ICMP_HEADER_LEN:]
                 icmp_type, code, checksum, pktID, seq = struct.unpack('BbHHh', icmp_header)
@@ -203,5 +210,9 @@ class PortDeceiver:
 
             else:
                 continue
+
+
+
+
 
 

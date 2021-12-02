@@ -2,6 +2,7 @@ import logging
 import argparse
 import src.settings as settings
 from src.port_deceiver import PortDeceiver
+from src.os_deceiver import OsDeceiver
 
 
 logging.basicConfig(
@@ -16,8 +17,12 @@ def main():
     parser.add_argument('--host', action="store", help='specify destination ip')
     parser.add_argument('--port', action="store", help='specify destination port')
     parser.add_argument('--nic', action="store", help='nic where we capture the packets')
-    parser.add_argument('--scan', action="store", help='attacker\'s port scanning technique') 
-    parser.add_argument('--status', action="store", help='designate port status') 
+    parser.add_argument('--sT', action="store_true", help='sT port scanning technique deceiver')
+    parser.add_argument('--scan', action="store", help='attacker\'s port scanning technique') #new
+    parser.add_argument('--status', action="store", help='designate port status') #new
+    parser.add_argument('--hs', action="store_true", help='port and host scanning technique deceiver')
+    parser.add_argument('--open', action="store_true", help='designate port status -> open')
+    parser.add_argument('--close', action="store_true", help='designate port status -> close')
     args = parser.parse_args()
 
     if args.nic:
@@ -25,6 +30,14 @@ def main():
 
     if args.scan:
         port_scan_tech = args.scan
+
+        if port_scan_tech == 'or':
+            deceiver = OsDeceiver(args.host)
+            deceiver.os_record()
+        elif port_scan_tech == 'od':
+            deceiver = OsDeceiver(args.host)
+            deceiver.os_deceive()
+
         if args.status:
             deceive_status = args.status
             deceiver = PortDeceiver(args.host)
@@ -32,12 +45,16 @@ def main():
                 deceiver.sT(deceive_status)
             elif port_scan_tech == 'hs':
                 deceiver.deceive_ps_hs(deceive_status)
+            elif port_scan_tech == 'proxy':
+                deceiver.test_proxy()
         else:
             logging.debug('No port scan technique is designated')
             return
 
     else:
         logging.debug('No port scan technique is designated')
+        return
+
 
 if __name__ == '__main__':
     main()
