@@ -11,7 +11,7 @@ class OsDeceiver:
         self.host = host
         self.conn = TcpConnect(host)
 
-    def key_value_os_record(self):
+    def os_record(self):
         pkt_dict = {}
         port_pair_seq = []
         key_seq = []  # prevent IndexError cuz dict.keys() would ignore same keys
@@ -62,11 +62,11 @@ class OsDeceiver:
             else:
                 continue
 
-    def kv_os_deceive(self):
+    def os_deceive(self):
         os_file = open('pkt_record.txt', 'r')
-        packet_dict = eval(os_file.readline())
-        packet_dict = {k: v for (k, v) in packet_dict.items() if v is not None}
-        print('[!] loading pcap file for packet reply...')
+        pkt_dict = eval(os_file.readline())
+        pkt_dict = {k: v for (k, v) in pkt_dict.items() if v is not None}
+        print('[!] loaded pcap file for packet reply...')
 
         while True:
             packet, _ = self.conn.sock.recvfrom(65565)
@@ -90,18 +90,13 @@ class OsDeceiver:
                 tcp_option = pkt_info['tcp_option']
                 _, recv_kind_seq = unpack_tcp_option(tcp_option)
 
-                ### test ###
-                if pkt_info['dest_port'] == 22:
-                    print(packet)
-
                 # received 'RST', don't reply
                 if pkt_info['flags'] == 4:
                     continue
 
                 try:
-                    reply_packet = packet_dict[key]
+                    reply_packet = pkt_dict[key]
                 except KeyError:
-                    # print('[---x---] key not exist')
                     continue
 
                 reply_eth_header = reply_packet[: settings.ETH_HEADER_LEN]
@@ -144,119 +139,16 @@ class OsDeceiver:
                 reply_seq = pkt_info['ack_num']
                 reply_ack_num = pkt_info['seq'] + 1
                 tcp_len = (len(reply_tcp_header) + len(reply_tcp_option)) // 4
-                # print('tcplen: ', tcp_len)
                 reply_tcp_header_option = os_build_tcp_header_from_reply(tcp_len, reply_seq, reply_ack_num,
                                                                          reply_src_port, reply_dest_port,
                                                                          reply_src_IP, reply_dest_IP, reply_flags,
                                                                          reply_window, reply_tcp_option)
 
                 packet = reply_eth_header + reply_ip_header + reply_tcp_header_option
-                # print('[******] tcp/ip length', total_len)
-                # print('[******] reply_tcp_option', reply_tcp_option)
-                # print('[******]  reply_src_port', reply_src_port)
                 self.conn.sock.send(packet)
                 print('*' * 20, '\n', 'send 1 packet', '\n', '*'*20)
                 continue
 
-            else:
-                continue
-
-    def os_deceive(self):
-        os_file = open('pkt_record.txt', 'r')
-        packet_dict = eval(os_file.readline())
-        print('[!] loading pcap file for packet reply...')
-
-        while True:
-            packet, _ = self.conn.sock.recvfrom(65565)
-            eth_header = packet[: settings.ETH_HEADER_LEN]
-            eth = struct.unpack('!6s6sH', eth_header)
-            eth_protocol = socket.ntohs(eth[2])
-
-            if eth_protocol != 8:
-                continue
-
-            ip_header = packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN]
-            _, _, total_len, _, _, _, PROTOCOL, _, src_IP, dest_IP = struct.unpack('!BBHHHBBH4s4s', ip_header)
-
-            if dest_IP != socket.inet_aton(self.host):
-                continue
-
-            # tcp=6
-            if PROTOCOL == 6:
-                tcp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
-                                    settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN]
-                tcp_option = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN:]
-                recv_option_val, recv_kind_seq = unpack_tcp_option(tcp_option)
-                src_port, dest_port, seq, ack_num, _, flags, _, _, _ = struct.unpack('!HHLLBBHHH', tcp_header)
-
-                # received 'RST', don't reply
-                if flags == 4:
-                    continue
-
-                if dest_port in packet_dict and len(packet_dict[dest_port]) != 0:
-                    print('dest_port: ', dest_port)
-                    print('len(recv_kind_seq): ', len(recv_kind_seq))
-                    print('len(recv_kind_seq) in packet_dict[dest_port]:', len(recv_kind_seq) in packet_dict[dest_port])
-                    print('len(packet_dict[dest_port][len(recv_kind_seq)]) != 0: ', len(packet_dict[dest_port][len(recv_kind_seq)]) != 0)
-                    if len(recv_kind_seq) in packet_dict[dest_port] and \
-                            len(packet_dict[dest_port][len(recv_kind_seq)]) != 0:
-                        reply_packet = packet_dict[dest_port][len(recv_kind_seq)].pop(0)
-                        reply_eth_header = reply_packet[: settings.ETH_HEADER_LEN]
-                        reply_ip_header = reply_packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN +
-                                                       settings.IP_HEADER_LEN]
-                        reply_tcp_header = reply_packet[settings.ETH_HEADER_LEN +
-                                                        settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
-                                                        settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN]
-                        reply_tcp_option = reply_packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN +
-                                                        settings.TCP_HEADER_LEN:]
-                        IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID, FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, \
-                            check_sum_of_hdr, reply_src_IP, reply_dest_IP = struct.unpack('!BBHHHBBH4s4s', reply_ip_header)
-                        reply_src_IP = dest_IP
-                        reply_dest_IP = src_IP
-
-                        if len(reply_tcp_option) == 0:
-                            total_len = 40
-
-                        else:
-                            print('[******] len(reply_tcp_option): ', len(reply_tcp_option))
-                            total_len = len(reply_ip_header) + len(reply_tcp_header) + len(reply_tcp_option)
-                            option_val, kind_seq = unpack_tcp_option(reply_tcp_option)
-                            if 8 in recv_kind_seq:
-                                ts_val = unpack_tcp_option(tcp_option)[0]['ts_val']    # record packet's ts_val
-                                option_val['ts_echo_reply'] = ts_val
-                            reply_tcp_option = pack_tcp_option(option_val, kind_seq)
-
-                        check_sum_of_hdr = 0
-                        reply_ip_header = struct.pack('!BBHHHBBH4s4s', IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID,
-                                                      FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, check_sum_of_hdr,
-                                                      reply_src_IP, reply_dest_IP)
-                        check_sum_of_hdr = getIPChecksum(reply_ip_header)
-                        reply_ip_header = struct.pack('!BBHHHBBH4s4s', IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID,
-                                                      FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, check_sum_of_hdr,
-                                                      reply_src_IP, reply_dest_IP)
-                        reply_src_port, reply_dest_port, reply_seq, reply_ack_num, offset, reply_flags, reply_window, \
-                            checksum, urgent_ptr = struct.unpack('!HHLLBBHHH', reply_tcp_header)
-
-                        reply_src_port = dest_port
-                        reply_dest_port = src_port
-                        reply_seq = ack_num
-                        reply_ack_num = seq + 1
-                        tcp_len = (len(reply_tcp_header) + len(reply_tcp_option)) // 4
-                        print('tcplen: ', tcp_len)
-                        reply_tcp_header_option = os_build_tcp_header_from_reply(tcp_len, reply_seq, reply_ack_num,
-                                                                                 reply_src_port, reply_dest_port,
-                                                                                 reply_src_IP, reply_dest_IP, reply_flags,
-                                                                                 reply_window, reply_tcp_option)
-
-                        packet = reply_eth_header + reply_ip_header + reply_tcp_header_option
-                        print('[******] tcp/ip length', total_len)
-                        print('[******] reply_tcp_option', reply_tcp_option)
-                        print('[******]  reply_src_port', reply_src_port)
-                        self.conn.sock.send(packet)
-                        continue
-
-                else:
-                    continue
             else:
                 continue
 
@@ -294,59 +186,11 @@ def generate_key(packet: bytes):
                                                                                                    tcp_header)
     packet_val['src_port'], packet_val['dest_port'], packet_val['flags'] = src_port, dest_port, flags
     packet_val['seq'], packet_val['ack_num'] = seq, ack_num
-
-    # temp_ip = socket.inet_aton('0.0.0.0')
     src_port, seq, ack_num, checksum = 0, 0, 0, 0
     tcp_header = struct.pack('!HHLLBBHHH', src_port, dest_port, seq, ack_num, offset, flags, window, checksum,
                              urgent_ptr)
 
     # reserve original tcp option
-
     packet_key = ip_header + tcp_header + tcp_option
 
     return packet_key, packet_val
-
-''' 
-    def os_record(self):
-        packet_dict = {}
-        packet_num = 0
-        print('[!] self.conn.dip: ', self.conn.dip)
-
-        while True:
-            packet, _ = self.conn.sock.recvfrom(65565)
-            eth_header = packet[: settings.ETH_HEADER_LEN]
-            eth = struct.unpack('!6s6sH', eth_header)
-            eth_protocol = socket.ntohs(eth[2])
-
-            if eth_protocol != 8:
-                continue
-
-            ip_header = packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN]
-            IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID, FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, check_sum_of_hdr, \
-                src_IP, dest_IP = struct.unpack('!BBHHHBBH4s4s', ip_header)
-
-            # tcp=6
-            if PROTOCOL == 6:
-                if src_IP == socket.inet_aton(self.conn.dip):
-
-                    tcp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN
-                                                                + settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN]
-                    tcp_option = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN:]
-                    option_val, kind_seq = unpack_tcp_option(tcp_option)
-                    src_port, dest_port, seq, ack_num, offset, flags, window, checksum, urgent_ptr = struct.unpack(
-                        '!HHLLBBHHH', tcp_header)
-
-                    packet_num += 1
-                    if src_port not in packet_dict:
-                        packet_dict[src_port] = {}
-
-                    if len(kind_seq) not in packet_dict[src_port]:
-                        packet_dict[src_port][len(kind_seq)] = []
-
-                    packet_dict[src_port][len(kind_seq)].append(packet)
-                    f = open('pkt_record.txt', 'w')
-                    f.write(str(packet_dict))
-                    print('[!] written to txt - total ', packet_num, 'packet(s)')
-
-            continue
-        '''

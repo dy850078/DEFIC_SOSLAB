@@ -37,13 +37,14 @@ The following parameters you can use after installing NmapDeceiver
 
 ```--nic```  will cause NmapDeciver to send & monitor packet on this nic 
 
-```--scan``` use 's' or 'hs' to test different nmap scanning function
+```--scan``` use 'hs', 'or', 'od'  to against different nmap scanning function or record original os behaviors
 
 ```--status``` determine the status of these ports (```open``` or ```close```) you want to deceive
 
 Eg: ```python3 main.py --host 192.168.1.2 --nic eth0 --scan hs --status open``` or  
 
 ```python3 main.py --host 192.168.1.2 --scan s --status close```
+
 
 ## Reference
 

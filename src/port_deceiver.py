@@ -188,7 +188,8 @@ class PortDeceiver:
             elif PROTOCOL == 1:
                 if port_status == 'record':
                     continue
-                icmp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.ICMP_HEADER_LEN]
+                icmp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
+                                     settings.IP_HEADER_LEN + settings.ICMP_HEADER_LEN]
                 data = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.ICMP_HEADER_LEN:]
                 icmp_type, code, checksum, pktID, seq = struct.unpack('BbHHh', icmp_header)
                 pktID = 456

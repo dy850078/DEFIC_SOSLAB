@@ -15,11 +15,9 @@ logging.basicConfig(
 def main():
     parser = argparse.ArgumentParser(description='Deceiver Demo')
     parser.add_argument('--host', action="store", help='specify destination ip')
-    parser.add_argument('--port', action="store", help='specify destination port')
     parser.add_argument('--nic', action="store", help='nic where we capture the packets')
-    parser.add_argument('--sT', action="store_true", help='sT port scanning technique deceiver')
-    parser.add_argument('--scan', action="store", help='attacker\'s port scanning technique') #new
-    parser.add_argument('--status', action="store", help='designate port status') #new
+    parser.add_argument('--scan', action="store", help='attacker\'s port scanning technique')
+    parser.add_argument('--status', action="store", help='designate port status')
     parser.add_argument('--hs', action="store_true", help='port and host scanning technique deceiver')
     parser.add_argument('--open', action="store_true", help='designate port status -> open')
     parser.add_argument('--close', action="store_true", help='designate port status -> close')
@@ -33,11 +31,10 @@ def main():
 
         if port_scan_tech == 'or':
             deceiver = OsDeceiver(args.host)
-            # deceiver.os_record()
-            deceiver.key_value_os_record()
+            deceiver.os_record()
         elif port_scan_tech == 'od':
             deceiver = OsDeceiver(args.host)
-            deceiver.kv_os_deceive()
+            deceiver.os_deceive()
 
         if args.status:
             deceive_status = args.status
