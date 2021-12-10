@@ -33,10 +33,11 @@ def main():
 
         if port_scan_tech == 'or':
             deceiver = OsDeceiver(args.host)
-            deceiver.os_record()
+            # deceiver.os_record()
+            deceiver.key_value_os_record()
         elif port_scan_tech == 'od':
             deceiver = OsDeceiver(args.host)
-            deceiver.os_deceive()
+            deceiver.kv_os_deceive()
 
         if args.status:
             deceive_status = args.status
@@ -45,8 +46,7 @@ def main():
                 deceiver.sT(deceive_status)
             elif port_scan_tech == 'hs':
                 deceiver.deceive_ps_hs(deceive_status)
-            elif port_scan_tech == 'proxy':
-                deceiver.test_proxy()
+
         else:
             logging.debug('No port scan technique is designated')
             return
