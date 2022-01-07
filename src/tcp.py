@@ -146,3 +146,14 @@ def pack_tcp_option(option_val, kind_seq):
 
     return reply_tcp_option
 
+
+def byte2mac(mac_byte):
+    mac_str = "%02x:%02x:%02x:%02x:%02x:%02x" % struct.unpack("BBBBBB", mac_byte)
+
+    return mac_str
+
+
+def byte2ip(ip_byte):
+    ip_str = socket.inet_ntoa(ip_byte)
+
+    return ip_str
