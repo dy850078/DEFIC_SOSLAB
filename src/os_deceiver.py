@@ -5,6 +5,7 @@ import src.settings as settings
 from src.Packet import Packet
 from src.tcp import TcpConnect, getIPChecksum, unpack_tcp_option, pack_tcp_option, os_build_tcp_header_from_reply, \
     getTCPChecksum
+import random
 
 
 class OsDeceiver:
@@ -187,7 +188,6 @@ class OsDeceiver:
                 # tcp=6
                 if PROTOCOL == 6:
                     key, pkt_info = gen_tcp_key(packet)
-                    tcp_header = pkt_info['tcp_header']
                     tcp_option = pkt_info['tcp_option']
                     _, recv_kind_seq = unpack_tcp_option(tcp_option)
 
@@ -241,7 +241,12 @@ class OsDeceiver:
                     reply_src_port = pkt_info['dest_port']
                     reply_dest_port = pkt_info['src_port']
                     reply_seq = pkt_info['ack_num']
-                    reply_ack_num = pkt_info['seq'] + 1
+                    if pkt_info['flags'] == 0:
+                        reply_ack_num = pkt_info['seq']
+                    elif pkt_info['flags'] == 43:
+                        reply_ack_num = pkt_info['seq'] + 2
+                    else:
+                        reply_ack_num = pkt_info['seq'] + 1
                     tcp_len = (len(reply_tcp_header) + len(reply_tcp_option)) // 4
                     reply_tcp_header_option = os_build_tcp_header_from_reply(tcp_len, reply_seq, reply_ack_num,
                                                                              reply_src_port, reply_dest_port,
@@ -273,7 +278,8 @@ class OsDeceiver:
                         check_sum_of_hdr, reply_src_IP, reply_dest_IP = struct.unpack('!BBHHHBBH4s4s', reply_ip_header)
 
                     # replace ip field and compute checksum
-                    pktID = 456  # arbitrary number but maybe this random value generation is critical to os fingerprint
+                    # arbitrary number but maybe this random value generation is critical to os fingerprint
+                    pktID = 456
                     reply_src_IP = dest_IP
                     reply_dest_IP = src_IP
                     check_sum_of_hdr = 0
@@ -316,7 +322,8 @@ class OsDeceiver:
                         check_sum_of_hdr, reply_src_IP, reply_dest_IP = struct.unpack('!BBHHHBBH4s4s', reply_ip_header)
 
                     # replace ip field and compute checksum
-                    pktID = 456  # arbitrary number but maybe this random value generation is critical to os fingerprint
+                    # arbitrary number but maybe this random value generation is critical to os fingerprint
+                    pktID = 456
                     reply_src_IP = dest_IP
                     reply_dest_IP = src_IP
                     check_sum_of_hdr = 0
