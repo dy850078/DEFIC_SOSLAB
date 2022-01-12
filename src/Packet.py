@@ -52,8 +52,14 @@ class Packet:
         IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID, FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, check_sum_of_hdr, \
         src_IP, dest_IP = struct.unpack('!BBHHHBBH4s4s', self.ip_header)
 
-        if PROTOCOL == 6:
+        if PROTOCOL == 1:
+            self.l4_type = 'icmp'
+        elif PROTOCOL == 6:
             self.l4_type = 'tcp'
+        elif PROTOCOL == 17:
+            self.l4_type = 'udp'
+        else:
+            self.l4_type = 'others'
 
         self.ip_field = {
             'IHL_VERSION': IHL_VERSION,
@@ -72,12 +78,12 @@ class Packet:
         packet = self.packet
         self.tcp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
                                  settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN]
-        self.tcp_option = packet[
-                          settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN:
-                          settings.ETH_HEADER_LEN + self.ip_field['total_len']]
+        self.tcp_option = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN:
+                                 settings.ETH_HEADER_LEN + self.ip_field['total_len']]
         self.padding = packet[settings.ETH_HEADER_LEN + self.ip_field['total_len']:]
         src_port, dest_port, seq, ack_num, offset, flags, window, checksum, urgent_ptr = struct.unpack(
             '!HHLLBBHHH', self.tcp_header)
+
         self.tcp_field = {
             'src_port': src_port,
             'dest_port': dest_port,

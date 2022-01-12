@@ -5,7 +5,6 @@ import src.settings as settings
 from src.Packet import Packet
 from src.tcp import TcpConnect, getIPChecksum, unpack_tcp_option, pack_tcp_option, os_build_tcp_header_from_reply, \
     getTCPChecksum
-import random
 
 
 class OsDeceiver:
@@ -36,6 +35,7 @@ class OsDeceiver:
             eth = struct.unpack('!6s6sH', eth_header)
             eth_protocol = socket.ntohs(eth[2])
 
+            # ip=8
             if eth_protocol == 8:
                 ip_header = packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN]
                 _, _, _, _, _, _, PROTOCOL, _, src_IP, dest_IP = struct.unpack('!BBHHHBBH4s4s', ip_header)
@@ -73,6 +73,7 @@ class OsDeceiver:
                     f.write(str(pkt_dict))
                     f.close()
 
+                # icmp=1
                 elif PROTOCOL == 1:
                     icmp_header = packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
                                          settings.IP_HEADER_LEN + settings.ICMP_HEADER_LEN]
@@ -130,6 +131,7 @@ class OsDeceiver:
                 else:
                     continue
 
+            # arp=1544
             elif eth_protocol == 1544:
                 arp_header = packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN + settings.ARP_HEADER_LEN]
                 hw_type, proto_type, hw_size, proto_size, opcode, sender_mac, sender_ip, recv_mac, recv_ip = \
@@ -203,9 +205,9 @@ class OsDeceiver:
                     # reply_eth_header = reply_packet[: settings.ETH_HEADER_LEN]
                     reply_ip_header = reply_packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN +
                                                    settings.IP_HEADER_LEN]
-                    reply_tcp_header = reply_packet[settings.ETH_HEADER_LEN +
-                                                    settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
-                                                    settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN]
+                    reply_tcp_header = reply_packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN:
+                                                    settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN +
+                                                    settings.TCP_HEADER_LEN]
 
                     IHL_VERSION, TYPE_OF_SERVICE, total_len, pktID, FRAGMENT_STATUS, TIME_TO_LIVE, PROTOCOL, \
                         check_sum_of_hdr, reply_src_IP, reply_dest_IP = struct.unpack('!BBHHHBBH4s4s', reply_ip_header)
@@ -386,6 +388,31 @@ class OsDeceiver:
                 print('\n', '*' * 20, '\n', 'send 1  arp packet', '\n', '*'*20)
             else:
                 continue
+
+    def store_rsp(self):
+        rsp = {}
+        while True:
+            packet, _ = self.conn.sock.recvfrom(65565)
+            eth_header = packet[: settings.ETH_HEADER_LEN]
+            eth = struct.unpack('!6s6sH', eth_header)
+            eth_protocol = socket.ntohs(eth[2])
+
+            if eth_protocol == 8:
+                ip_header = packet[settings.ETH_HEADER_LEN: settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN]
+                _, _, _, _, _, _, PROTOCOL, _, src_IP, dest_IP = struct.unpack('!BBHHHBBH4s4s', ip_header)
+
+                # tcp=6
+                if PROTOCOL == 6 and src_IP == socket.inet_aton(self.host):
+                    pkt = Packet(packet)
+                    src_port = pkt.tcp_field['src_port']
+                    if src_port not in rsp:
+                        rsp[src_port] = []
+                    rsp[src_port].append(packet)
+
+                    f = open('rsp_record.txt', 'w')
+                    f.write(str(rsp))
+                    f.close()
+            continue
 
 
 def load_pkt_file(pkt_type: str):

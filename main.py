@@ -33,11 +33,13 @@ def main():
 
         if port_scan_tech == 'or':
             deceiver = OsDeceiver(args.host)
-            # deceiver.os_record()
             deceiver.os_record()
         elif port_scan_tech == 'od':
             deceiver = OsDeceiver(args.host)
             deceiver.os_deceive()
+        elif port_scan_tech == 'rr':
+            deceiver = OsDeceiver(args.host)
+            deceiver.store_rsp()
 
         if args.status:
             deceive_status = args.status
