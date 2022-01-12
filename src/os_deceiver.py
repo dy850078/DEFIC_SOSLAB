@@ -9,8 +9,9 @@ from src.tcp import TcpConnect, getIPChecksum, unpack_tcp_option, pack_tcp_optio
 
 class OsDeceiver:
 
-    def __init__(self, host):
+    def __init__(self, host, os):
         self.host = host
+        self.os = os
         self.conn = TcpConnect(host)
 
     def os_record(self):
@@ -163,10 +164,10 @@ class OsDeceiver:
         logging.basicConfig(level=logging.INFO)
 
         # load packet reference
-        arp_packet_dict = load_pkt_file('arp')
-        packet_dict = load_pkt_file('tcp')
-        udp_packet_dict = load_pkt_file('udp')
-        icmp_packet_dict = load_pkt_file('icmp')
+        arp_packet_dict = self.load_file('arp')
+        tcp_packet_dict = self.load_file('tcp')
+        udp_packet_dict = self.load_file('udp')
+        icmp_packet_dict = self.load_file('icmp')
 
         while True:
             packet, _ = self.conn.sock.recvfrom(65565)
@@ -198,7 +199,7 @@ class OsDeceiver:
                         continue
 
                     try:
-                        reply_packet = packet_dict[key]
+                        reply_packet = tcp_packet_dict[key]
                     except KeyError:
                         continue
 
@@ -414,15 +415,14 @@ class OsDeceiver:
                     f.close()
             continue
 
+    def load_file(self, pkt_type: str):
+        logging.basicConfig(level=logging.INFO)
+        file = open('os_record/%s/%s_record.txt' % (self.os, pkt_type), 'r')
+        packet_dict = eval(file.readline())
+        clean_packet_dict = {k: v for (k, v) in packet_dict.items() if v is not None}
+        logging.info('%s pcap file is loaded' % pkt_type)
 
-def load_pkt_file(pkt_type: str):
-    logging.basicConfig(level=logging.INFO)
-    file = open('%s_record.txt' % pkt_type, 'r')
-    packet_dict = eval(file.readline())
-    clean_packet_dict = {k: v for (k, v) in packet_dict.items() if v is not None}
-    logging.info('%s pcap file is loaded' % pkt_type)
-
-    return clean_packet_dict
+        return clean_packet_dict
 
 
 def gen_tcp_key(packet: bytes):

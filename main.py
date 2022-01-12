@@ -20,9 +20,8 @@ def main():
     parser.add_argument('--sT', action="store_true", help='sT port scanning technique deceiver')
     parser.add_argument('--scan', action="store", help='attacker\'s port scanning technique') #new
     parser.add_argument('--status', action="store", help='designate port status') #new
+    parser.add_argument('--os', action="store", help='designate os we want to deceive')
     parser.add_argument('--hs', action="store_true", help='port and host scanning technique deceiver')
-    parser.add_argument('--open', action="store_true", help='designate port status -> open')
-    parser.add_argument('--close', action="store_true", help='designate port status -> close')
     args = parser.parse_args()
 
     if args.nic:
@@ -35,8 +34,11 @@ def main():
             deceiver = OsDeceiver(args.host)
             deceiver.os_record()
         elif port_scan_tech == 'od':
-            deceiver = OsDeceiver(args.host)
-            deceiver.os_deceive()
+            if args.os is None:
+                logging.debug('No os is designated')
+            else:
+                deceiver = OsDeceiver(args.host, args.os)
+                deceiver.os_deceive()
         elif port_scan_tech == 'rr':
             deceiver = OsDeceiver(args.host)
             deceiver.store_rsp()
