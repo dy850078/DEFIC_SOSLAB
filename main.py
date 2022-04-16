@@ -23,6 +23,7 @@ def main():
     parser.add_argument('--os', action="store", help='designate os we want to deceive')
     parser.add_argument('--hs', action="store_true", help='port and host scanning technique deceiver')
     args = parser.parse_args()
+    settings.host = args.host
 
     if args.nic:
         settings.NIC = args.nic
@@ -31,7 +32,7 @@ def main():
         port_scan_tech = args.scan
 
         if port_scan_tech == 'or':
-            deceiver = OsDeceiver(args.host)
+            deceiver = OsDeceiver(args.host, args.os)
             deceiver.os_record()
         elif port_scan_tech == 'od':
             if args.os is None:
@@ -40,7 +41,7 @@ def main():
                 deceiver = OsDeceiver(args.host, args.os)
                 deceiver.os_deceive()
         elif port_scan_tech == 'rr':
-            deceiver = OsDeceiver(args.host)
+            deceiver = OsDeceiver(args.host, args.os)
             deceiver.store_rsp()
 
         if args.status:
