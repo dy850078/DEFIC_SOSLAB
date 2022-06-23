@@ -1,4 +1,4 @@
-# NmapDeceiver
+# DEFIC
 
 ## What is Nmap?
 Nmap (“Network Mapper”) is an open source tool for network exploration and security auditing.
@@ -12,22 +12,19 @@ Although it has a lot of useful features, there have 3 well-known features:
     -  what operating systems (and OS versions) they are running
 
 
-## Why do you need NmapDeciver?
+## Why do you need DEFIC?
 
-### First step in the cyber kill chain
-Network reconnaissance is the first step of the cyber kill chain from the adversaries' perspective, in this phase, adversaries may try to research, distinguish and choose the target by using reconnaissance tools (ex: Nmap, etc) to obtain critical information related to the target environment (e.g. OS version/ service/ ...).
+### First step in the cyber kill chain & MITRE&CK
+Network reconnaissance stands the first stage of a cyber kill chain, where adversaries conduct host discovery, port scanning, and operating system detection in order to obtain critical information from remote hosts. 
 
-### Why do we create NmapDeceiver?
-Our Objection is to deceive the adversaries when s/he take the first step of network attack - Network reconnaissance.
+### Why do we create DEFIC?
+Our primary purpose is to install a defensive deception solution on the target network, transparently sniffing malicious and normal traffic and forging the real host responses. DEFIC can mimic a target system to scrub the real identity of systems behind it.
 
-We install NmapDeceiver in the router(s), so whenever we receive a Nmap scanning packet from the adversaries, we can manipulate it and send the corresponding packets back to perform the different status of our environment.
+## Running DEFIC
 
+You can clone this repository for the most recent changes:
 
-## Running NmapDeceiver
-
-You can clone the NmapDeceiver repository for the most recent changes:
-
-```git clone https://github.com/dy850078/NmapDeceiver.git```
+```git clone https://github.com/dy850078/DEFIC_SOSLAB.git```
 
 The following parameters you can use after installing NmapDeceiver
 
@@ -37,13 +34,13 @@ The following parameters you can use after installing NmapDeceiver
 
 ```--nic```  will cause NmapDeciver to send/receive packet on this nic
 
-```--scan``` use ```hs``` / ```or``` / ```od``` to against different nmap scanning function
+```--scan``` use ```ts``` for OS template synthesis, ```od``` for os deceiver, ```hs``` for port deceiver
 
-```--status``` determine the status of these ports (```open``` or ```close```) you want to deceive (only when you use ```--scan hs``` and we'll talk about this command in detail at next chapter)
+```--status``` determine the status of these ports (```open``` or ```close```) you want to deceive (only when you use ```--scan hs``` and we'll talk about this command in detail at the next chapter)
 
 Eg: ```python3 main.py --host 192.168.1.2 --nic eth0 --scan hs --status open``` or  
 
-```python3 main.py --host 192.168.1.2 --scan s --status close```
+```python3 main.py --host 192.168.1.2 --scan od --os win7```
 
 ### Obfuscation method
 
@@ -51,15 +48,31 @@ about ```--scan``` command we just descirbed aboved, you can use ```hs / or / od
 
 - ***hs***
 
-  port scanning deceiver
+  Port deceiver
 
 - ***od***
 
-  os scanning deceiver
+  OS deceiver
 
-- ***or***
+- ***ts***
 
-  record normal os packets
+  Synthesizee deceived OS template
+  
+
+### Simple test
+
+Prepare 3 hosts (or VMs) which include a attaker foothold (with Nmap), a victim, and a deceiver (at least contains 2 NICs).
+Make the traffic between the attacker foothold and the victim can pass through the deceiver (by connecting each of them to the decevier's 2 NIC respectively and bridge the NICs)
+
+*clone this repository to the deceiver*
+```git clone https://github.com/dy850078/DEFIC_SOSLAB.git```
+
+*cd to the DEFIC_SOSLAB and execute the following instruction*
+```python3 main.py --host <victim's IP> --scan od --os <OS template e.g. win7/win10/centos>```
+you can also designate a NIC by ```--nic```.
+
+*run Nmap OS detection on attacker foothold and observe the result*
+```nmap -O <vimtim's IP>```
 
 
 
