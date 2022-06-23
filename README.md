@@ -65,13 +65,17 @@ Prepare 3 hosts (or VMs) which include a attaker foothold (with Nmap), a victim,
 Make the traffic between the attacker foothold and the victim can pass through the deceiver (by connecting each of them to the decevier's 2 NIC respectively and bridge the NICs)
 
 *clone this repository to the deceiver*
+
 ```git clone https://github.com/dy850078/DEFIC_SOSLAB.git```
 
 *cd to the DEFIC_SOSLAB and execute the following instruction*
+
 ```python3 main.py --host <victim's IP> --scan od --os <OS template e.g. win7/win10/centos>```
+
 you can also designate a NIC by ```--nic```.
 
 *run Nmap OS detection on attacker foothold and observe the result*
+
 ```nmap -O <vimtim's IP>```
 
 
