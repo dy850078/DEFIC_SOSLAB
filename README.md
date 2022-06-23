@@ -61,8 +61,8 @@ about ```--scan``` command we just descirbed aboved, you can use ```hs / or / od
 
 ### Simple test
 
-Prepare 3 hosts (or VMs) which include a attaker foothold (with Nmap), a victim, and a deceiver (at least contains 2 NICs).
-Make the traffic between the attacker foothold and the victim can pass through the deceiver (by connecting each of them to the decevier's 2 NIC respectively and bridge the NICs)
+Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a victim, and a deceiver (at least contains 2 NICs).
+Make the traffic between the attacker foothold and the victim can pass through the deceiver (by connecting each of them to the deceiver's 2 NIC respectively and bridging the NICs)
 
 *clone this repository to the deceiver*
 
