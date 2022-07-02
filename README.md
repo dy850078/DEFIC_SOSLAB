@@ -64,6 +64,7 @@ about ```--scan``` command we just descirbed aboved, you can use ```hs / or / od
 Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a protected server, and a DEFIC server (at least contains 2 NICs).
 Make the traffic between the attacker foothold and the protected server can pass through the DEFIC server (make sure they all connect to the DEFIC server's 2 NIC respectively and then bridging the NICs)
 
+
 ### *OS deceiver test*
 
 #### *STEP1: clone this repository to the DEFIC server*
@@ -78,9 +79,35 @@ you can also designate a NIC by ```--nic```.
 
 #### *STEP3: run Nmap OS detection on attacker foothold and observe the result*
 
-```nmap -O <vimtim's IP>```
+```nmap -O <protected server's IP>```
 
+### *Template synthesis test*
 
+#### *STEP1: cd to the DEFIC_SOSLAB folder and execute the following instruction*
+
+```python3 main.py --host <protected server's IP> --scan ts --os <OS template you want to synthesize e.g. win7/win10/centos>```
+
+#### *STEP2: run Nmap OS detection on attacker foothold and observe the result*
+
+```nmap -O <protected server's IP>```
+
+#### *STEP3: move the template*
+
+DEFIC will generate the template in your current directory to prevent overriding. It would help if you moved them to ```/os_record/<OS template name>``` to deploy the template correctly.
+
+#### *STEP4: rerun Nmap OS detection to check the template is deployed properly*
+
+```nmap -O <protected server's IP>```
+
+### *Port deceiver test*
+
+#### *STEP1: cd to the DEFIC_SOSLAB folder and execute the following instruction*
+
+```python3 main.py --host <protected server's IP> --scan pd --port <deceptive port num> --status <open|close>```
+
+#### *STEP2: run Nmap port scanning on attacker foothold and observe the result*
+
+```nmap -sT <protected server's IP>```
 
 ## Reference
 
