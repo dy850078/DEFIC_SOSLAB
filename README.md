@@ -95,7 +95,7 @@ you can also designate a NIC by ```--nic```.
 
 #### *STEP3: move the template*
 
-DEFIC will generate the template in your current directory to prevent overriding. It would help if you moved them to ```/os_record/<OS template name>``` to deploy the template correctly.
+DEFIC will generate the template in your current directory to prevent overriding. You have to move them to ```/os_record/<OS template name>``` to deploy the template correctly.
 
 #### *STEP4: rerun Nmap OS detection to check the template is deployed properly*
 
