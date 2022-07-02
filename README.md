@@ -12,7 +12,7 @@ Although it has a lot of useful features, there have 3 well-known features:
     -  what operating systems (and OS versions) they are running
 
 
-## Why do you need DEFIC?
+## Why DEFIC?
 
 ### First step in the cyber kill chain & MITRE&CK
 Network reconnaissance stands the first stage of a cyber kill chain, where adversaries conduct host discovery, port scanning, and operating system detection in order to obtain critical information from remote hosts. 
