@@ -117,9 +117,8 @@ DEFIC will generate the template in your current directory to prevent overriding
 We use port knocking technology to implement the whitelist mechanism, you can use knock.py for simple testing.
 
 #### *STEP1: set the port sequence in settings.py*
-Downlad ```knock.py``` in this registry to the legal user's host.
-Alter ```PORT_SEQ=[]``` in DEFIC server's ```DEFIC_SOSLAB/src/setting.py``` to set the port sequence.
-For example, ```PORT_SEQ=[444, 555, 666]```.
+Downlad ```knock.py``` in this registry to the legal user's host and alter ```PORT_SEQ=[]``` in DEFIC server's ```DEFIC_SOSLAB/src/setting.py``` to set the port sequence.
+e.g. ```PORT_SEQ=[444, 555, 666]```.
 
 #### *STEP2: knock the sequence by knock.py*
 Use another host in this network to execute ```python3 knock.py <src_IP> <dest_IP> <p1> <p2> <p3>``` // The testing script supports 3 ports to be specified
@@ -134,7 +133,7 @@ When the time limit expires, sending the packet to the protected server will dis
 ```
 22-06-07 10:00 [INFO]: <leagalUserIp> authentication is expired.
 ```
-You can also set the validation time of white list via
+You can also set the validation time of whitelist via
 ```white_list_validation = datetime.timedelta(seconds=<validation_time>)``` in ```src/settings.py```
 
 
