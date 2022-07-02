@@ -59,18 +59,20 @@ about ```--scan``` command we just descirbed aboved, you can use ```hs / or / od
   Synthesize deceptive OS template
   
 
-### Simple test
+## Simple test
 
-Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a victim, and a DEFIC server (at least contains 2 NICs).
-Make the traffic between the attacker foothold and the victim can pass through the deceiver (by connecting each of them to the deceiver's 2 NIC respectively and bridging the NICs)
+Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a protected server, and a DEFIC server (at least contains 2 NICs).
+Make the traffic between the attacker foothold and the protected server can pass through the DEFIC server (make sure they all connect to the DEFIC server's 2 NIC respectively and then bridging the NICs)
 
-#### *STEP1: clone this repository to the deceiver*
+### *OS deceiver test*
+
+#### *STEP1: clone this repository to the DEFIC server*
 
 ```git clone https://github.com/dy850078/DEFIC_SOSLAB.git```
 
 #### *STEP2: cd to the DEFIC_SOSLAB folder and execute the following instruction*
 
-```python3 main.py --host <victim's IP> --scan od --os <OS template e.g. win7/win10/centos>```
+```python3 main.py --host <protected server's IP> --scan od --os <OS template e.g. win7/win10/centos>```
 
 you can also designate a NIC by ```--nic```.
 
