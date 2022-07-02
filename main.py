@@ -17,11 +17,9 @@ def main():
     parser.add_argument('--host', action="store", help='specify destination ip')
     parser.add_argument('--port', action="store", help='specify destination port')
     parser.add_argument('--nic', action="store", help='nic where we capture the packets')
-    parser.add_argument('--sT', action="store_true", help='sT port scanning technique deceiver')
-    parser.add_argument('--scan', action="store", help='attacker\'s port scanning technique') #new
-    parser.add_argument('--status', action="store", help='designate port status') #new
+    parser.add_argument('--scan', action="store", help='attacker\'s port scanning technique')
+    parser.add_argument('--status', action="store", help='designate port status')
     parser.add_argument('--os', action="store", help='designate os we want to deceive')
-    parser.add_argument('--hs', action="store_true", help='port and host scanning technique deceiver')
     args = parser.parse_args()
     settings.host = args.host
 
@@ -31,7 +29,7 @@ def main():
     if args.scan:
         port_scan_tech = args.scan
 
-        if port_scan_tech == 'or':
+        if port_scan_tech == 'ts':
             deceiver = OsDeceiver(args.host, args.os)
             deceiver.os_record()
         elif port_scan_tech == 'od':
@@ -46,10 +44,8 @@ def main():
 
         if args.status:
             deceive_status = args.status
-            deceiver = PortDeceiver(args.host)
-            if port_scan_tech == 's':
-                deceiver.sT(deceive_status)
-            elif port_scan_tech == 'hs':
+            if port_scan_tech == 'pd':
+                deceiver = PortDeceiver(args.host)
                 deceiver.deceive_ps_hs(deceive_status)
 
         else:
@@ -57,7 +53,7 @@ def main():
             return
 
     else:
-        logging.debug('No port scan technique is designated')
+        logging.debug('No scan technique is designated')
         return
 
 

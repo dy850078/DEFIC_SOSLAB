@@ -1,18 +1,29 @@
+from _datetime import datetime, timedelta
 import logging
+import random
 import socket
 import struct
+from typing import List, Any
+
 import src.settings as settings
 from src.Packet import Packet
-from src.tcp import TcpConnect, getIPChecksum, unpack_tcp_option, pack_tcp_option, os_build_tcp_header_from_reply, \
-    getTCPChecksum
+from src.tcp import TcpConnect
+
+
+count = 0
 
 
 class OsDeceiver:
+    white_list = []
 
     def __init__(self, host, os):
         self.host = host
         self.os = os
         self.conn = TcpConnect(host)
+        self.knocking_history = {}
+        self.white_list = {}
+        # self.port_seq = [random.randint(0, 65535) for _ in range(3)]
+        self.port_seq = [4441, 5551, 6661]
 
     def os_record(self):
         arp_pkt_dict = {}
@@ -195,7 +206,7 @@ class OsDeceiver:
 
     def os_deceive(self):
         logging.basicConfig(level=logging.INFO)
-
+        dec_count = 0
         # load packet reference
         template_dict = {
             'arp': self.load_file('arp'),
@@ -209,16 +220,67 @@ class OsDeceiver:
             raw_pkt, _ = self.conn.sock.recvfrom(65565)
             pkt = Packet(packet=raw_pkt)
             pkt.unpack()
+            proc = pkt.get_proc()
 
+            if proc == 'tcp':
+                """Free port"""
+                if pkt.l3_field['dest_IP'] == Packet.ip_str2byte(self.host) and \
+                        pkt.l4_field['dest_port'] in settings.FREE_PORT:
+                    continue
+
+                """Port Knocking"""
+                self.add_knocking_history(pkt)
+                if self.verify_knocking(pkt):
+                    src = ip_byte2str(pkt.l3_field['src_IP'])
+                    dst = ip_byte2str(pkt.l3_field['dest_IP'])
+                    self.white_list[pkt.l3_field['src_IP']] = datetime.now()
+                    logging.info(f"add {src} into white list.")
+                    logging.info(f"{self.white_list}")
+                if pkt.l3_field['src_IP'] in self.white_list:
+                    if self.white_list[pkt.l3_field['src_IP']] + settings.white_list_validation >= datetime.now():
+                        logging.info(f"legal user <{src}:{pkt.l4_field['src_port']}> ====> "
+                                     f"<{dst}:{pkt.l4_field['dest_port']}>")
+                        continue
+                    # update status when the authentication of this source IP is expired
+                    else:
+                        logging.info(f"<{src}> authentication is expired")
+                        self.white_list.pop(pkt.l3_field['src_IP'])
+                    continue
+
+            """OS Deceive"""
             if (pkt.l3 == 'ip' and pkt.l3_field['dest_IP'] == socket.inet_aton(self.host)) or \
                     (pkt.l3 == 'arp' and pkt.l3_field['recv_ip'] == socket.inet_aton(self.host)):
                 req = pkt
-                proc = req.l3 if req.l4 == '' else req.l4
+                # proc = req.l3 if req.l4 == '' else req.l4
                 rsp = deceived_pkt_synthesis(proc, req, template_dict)
                 if rsp is not None:
-                    print(f'send: {proc}')
+                    dec_count += 1
+                    print(f'send: {proc}, deceptive packet counter: {dec_count}')
                     self.conn.sock.send(rsp)
             continue
+
+    def add_knocking_history(self, packet: Packet):
+        try:
+            self.knocking_history[packet.l3_field['src_IP']].append(packet.l4_field['dest_port'])
+        except KeyError:
+            self.knocking_history[packet.l3_field['src_IP']] = [packet.l4_field['dest_port']]
+
+    def verify_knocking(self, packet: Packet):
+        idx = []
+        if packet.l3_field['src_IP'] in self.white_list:
+            self.knocking_history.pop(packet.l3_field['src_IP'])
+            return False
+
+        try:
+            for port in self.port_seq:
+                idx.append(self.knocking_history[packet.l3_field['src_IP']].index(port))
+        except ValueError:
+            return False
+
+        if all(idx[i + 1] - idx[i] == 1 for i in range(len(idx) - 1)):
+            return True
+        else:
+            return False
 
 
 def deceived_pkt_synthesis(proc: str, req: Packet, template: dict):
@@ -242,6 +304,8 @@ def deceived_pkt_synthesis(proc: str, req: Packet, template: dict):
         template.l3_field['dest_IP'] = req.l3_field['src_IP']
         # tcp
         template.l4_field['src_port'] = req.l4_field['dest_port']
+        if template.l4_field['src_port'] == 80:
+            print('8080880880808')
         template.l4_field['dest_port'] = req.l4_field['src_port']
         template.l4_field['seq'] = req.l4_field['ack_num']
 
@@ -455,3 +519,10 @@ def gen_udp_key(packet: bytes):
     packet_key = udp_header + data
 
     return packet_key, packet_val
+
+
+def ip_byte2str(ip_byte):
+    ip = list(struct.unpack('!4B', ip_byte))
+    for i in range(len(ip)):
+        ip[i] = str(ip[i])
+    return '.'.join(ip)
