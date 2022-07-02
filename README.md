@@ -65,7 +65,7 @@ Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a prot
 Make the traffic between the attacker foothold and the protected server can pass through the DEFIC server (make sure they all connect to the DEFIC server's 2 NIC respectively and then bridging the NICs)
 
 
-### *OS deceiver test*
+### * WINOS deceiver test*
 
 #### *STEP1: clone this repository to the DEFIC server*
 
@@ -80,6 +80,8 @@ you can also designate a NIC by ```--nic```.
 #### *STEP3: run Nmap OS detection on attacker foothold and observe the result*
 
 ```nmap -O <protected server's IP>```
+
+
 
 ### *Template synthesis test*
 
@@ -98,6 +100,8 @@ DEFIC will generate the template in your current directory to prevent overriding
 #### *STEP4: rerun Nmap OS detection to check the template is deployed properly*
 
 ```nmap -O <protected server's IP>```
+
+
 
 ### *Port deceiver test*
 
