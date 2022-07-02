@@ -113,6 +113,33 @@ DEFIC will generate the template in your current directory to prevent overriding
 
 ```nmap -sT <protected server's IP>```
 
+## Port Knocking
+We use port knocking technology to implement the whitelist mechanism, you can use knock.py for simple testing.
+
+#### *STEP1: set the port sequence in settings.py*
+Downlad ```knock.py``` in this registry to the legal user's host.
+Alter ```PORT_SEQ=[]``` in DEFIC server's ```DEFIC_SOSLAB/src/setting.py``` to set the port sequence.
+For example, ```PORT_SEQ=[444, 555, 666]```.
+
+#### *STEP2: knock the sequence by knock.py*
+Use another host in this network to execute ```python3 knock.py <src_IP> <dest_IP> <p1> <p2> <p3>``` // The testing script supports 3 ports to be specified
+
+#### *STEP3: check result*
+If the legal user is added to the white_list, it will be as follows:
+```
+22-06-07 08:58 [INFO]: add <leagalUserIp> into white list.
+22-06-07 08:58 [INFO]: {<legalUserIp_hex>: <validation_ddl>}
+```
+When the time limit expires, sending the packet to the protected server will display the following results:
+```
+22-06-07 10:00 [INFO]: <leagalUserIp> authentication is expired.
+```
+You can also set the validation time of white list via
+```white_list_validation = datetime.timedelta(seconds=<validation_time>)``` in ```src/settings.py```
+
+
+
+
 ## Reference
 
 Nmap doc.
