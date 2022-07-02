@@ -121,7 +121,7 @@ Downlad ```knock.py``` in this registry to the legal user's host and alter ```PO
 e.g. ```PORT_SEQ=[444, 555, 666]```.
 
 #### *STEP2: knock the sequence by knock.py*
-Use another host in this network to execute ```python3 knock.py <src_IP> <dest_IP> <p1> <p2> <p3>``` // The testing script supports 3 ports to be specified
+Use legal user's host in to execute ```python3 knock.py <src_IP> <dest_IP> <p1> <p2> <p3>``` // The testing script supports 3 ports to be specified
 
 #### *STEP3: check result*
 If the legal user is added to the white_list, it will be as follows:
