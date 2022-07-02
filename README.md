@@ -46,7 +46,7 @@ Eg: ```python3 main.py --host 192.168.1.2 --nic eth0 --scan hs --status open``` 
 
 about ```--scan``` command we just descirbed aboved, you can use ```hs / or / od``` these keywords after ```--scan``` to perform different obfuscation method
 
-- ***hs***
+- ***pd***
 
   Port deceiver
 
@@ -56,12 +56,12 @@ about ```--scan``` command we just descirbed aboved, you can use ```hs / or / od
 
 - ***ts***
 
-  Synthesizee deceived OS template
+  Synthesize deceptive OS template
   
 
 ### Simple test
 
-Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a victim, and a deceiver (at least contains 2 NICs).
+Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a victim, and a DEFIC server (at least contains 2 NICs).
 Make the traffic between the attacker foothold and the victim can pass through the deceiver (by connecting each of them to the deceiver's 2 NIC respectively and bridging the NICs)
 
 #### *STEP1: clone this repository to the deceiver*
