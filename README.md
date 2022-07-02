@@ -65,7 +65,7 @@ Prepare 3 hosts (or VMs), which include an attacker foothold (with Nmap), a prot
 Make the traffic between the attacker foothold and the protected server can pass through the DEFIC server (make sure they all connect to the DEFIC server's 2 NIC respectively and then bridging the NICs)
 
 
-### * WINOS deceiver test*
+### *OS deceiver test*
 
 #### *STEP1: clone this repository to the DEFIC server*
 
