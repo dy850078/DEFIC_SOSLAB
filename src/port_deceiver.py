@@ -85,14 +85,6 @@ class PortDeceiver:
 
             return True
 
-    def sT(self, deceive_status):
-        if deceive_status == 'open':
-            self.send_packet([2], [18])
-        elif deceive_status == 'close':
-            self.send_packet([2, 1, 0, 41, 16], [20, 20, 20, 20, 20])
-        else:
-            logging.warning('Unknown deceive status')
-
     def deceive_ps_hs(self, port_status):
         if port_status == 'open':
             port_flag = 18

@@ -1,3 +1,4 @@
+import logging
 import socket
 import struct
 import src.settings as settings
@@ -102,11 +103,10 @@ class Packet:
     def unpack_tcp_header(self) -> None:
         self.l4_header = self.packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
                                      settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN]
-        tcp_option = self.packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN:
-                                 settings.ETH_HEADER_LEN + self.l3_field['total_len']]
         padding = self.packet[settings.ETH_HEADER_LEN + self.l3_field['total_len']:]
         src_port, dest_port, seq, ack_num, offset, flags, window, checksum, urgent_ptr = struct.unpack(
-            '!HHLLBBHHH', self.l4_header)
+            '!HHLLsBHHH', self.l4_header)
+        tcp_len = int.from_bytes(offset, byteorder='big') >> 2
 
         self.l4_field = {
             'src_port': src_port,
@@ -118,20 +118,24 @@ class Packet:
             'window': window,
             'checksum': checksum,
             'urgent_ptr': urgent_ptr,
-            'tcp_option': tcp_option,
             'padding': padding,
+            'tcp_len': tcp_len,
+            'tcp_option': self.packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.TCP_HEADER_LEN:
+                                      settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + tcp_len],
+            'payload': self.packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + tcp_len:
+                                   settings.ETH_HEADER_LEN + self.l3_field['total_len']],
             'option_field': None,
             'kind_seq': []
         }
 
-        if tcp_option != b'':
-            option_field, kind_seq = Packet.unpack_tcp_option(tcp_option)
+        if self.l4_field['tcp_option'] != b'':
+            option_field, kind_seq = Packet.unpack_tcp_option(self.l4_field['tcp_option'])
             self.l4_field['option_field'] = option_field
             self.l4_field['kind_seq'] = kind_seq
 
     def unpack_udp_header(self) -> None:
         self.l4_header = self.packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN: settings.ETH_HEADER_LEN +
-                                                                                       settings.IP_HEADER_LEN + settings.UDP_HEADER_LEN]
+                                     settings.IP_HEADER_LEN + settings.UDP_HEADER_LEN]
         data = self.packet[settings.ETH_HEADER_LEN + settings.IP_HEADER_LEN + settings.UDP_HEADER_LEN:]
         src_port, dest_port, udp_len, checksum = struct.unpack('!4H', self.l4_header)
 
@@ -284,6 +288,9 @@ class Packet:
         self.l4_field['checksum'] = checksum
         self.l4_header = icmp_header
 
+    def get_proc(self):
+        return self.l3 if self.l4 == '' else self.l4
+
     @staticmethod
     def diff_tcp(pkt1, pkt2):
         diff = {}
@@ -428,8 +435,7 @@ class Packet:
             elif kind == 8:
                 length, = struct.unpack('!B', tcp_option[start_ptr:start_ptr + 1])
                 start_ptr += 1
-                option_val['ts_val'], option_val['ts_echo_reply'] = struct.unpack('!LL', tcp_option[
-                                                                                         start_ptr:start_ptr + length - 2])
+                option_val['ts_val'], option_val['ts_echo_reply'] = struct.unpack('!LL', tcp_option[start_ptr:start_ptr + length - 2])
                 start_ptr += length - 2
                 kind_seq.append(kind)
 
@@ -466,3 +472,5 @@ class Packet:
         '0000' --> b'\x00\x00'
         """
         return bytes.fromhex(padding_str)
+
+
